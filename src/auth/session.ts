@@ -39,3 +39,15 @@ export function validateSession(
 
   return session;
 }
+
+export function rotateSession(sessionId: string): Session | null {
+  const existing = validateSession(sessionId);
+
+  if (!existing) {
+    return null;
+  }
+
+  sessions.delete(sessionId);
+
+  return createSession(existing.userId);
+}
