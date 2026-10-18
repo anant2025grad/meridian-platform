@@ -11,6 +11,10 @@ import {
     validateSession,
 } from "../src/auth/session";
 
+import {
+    processIdempotentPayment,
+} from "../src/billing/idempotency";
+
 describe("Meridian platform", () => {
     it("rejects invalid email addresses", () => {
         expect(
@@ -53,5 +57,12 @@ describe("Meridian platform", () => {
         expect(rotated?.id).not.toBe(original.id);
         expect(validateSession(original.id)).toBeNull();
         expect(validateSession(rotated!.id)).not.toBeNull();
+    });
+
+    it("prevents duplicate transactions for the same key", () => {
+        const first = processIdempotentPayment("request-001", 50);
+        const second = processIdempotentPayment("request-001", 50);
+
+        expect(first.transactionId).toBe(second.transactionId);
     });
 });
