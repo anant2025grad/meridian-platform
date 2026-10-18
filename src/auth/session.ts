@@ -39,3 +39,7 @@ export function validateSession(
 
   return session;
 }
+
+export function revokeSession(sessionId: string): boolean {
+  return sessions.delete(sessionId);
+}
