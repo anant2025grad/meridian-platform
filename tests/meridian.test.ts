@@ -11,6 +11,8 @@ import {
     validateSession,
 } from "../src/auth/session";
 
+import { MockPaymentProvider } from "../src/billing/provider";
+
 describe("Meridian platform", () => {
     it("rejects invalid email addresses", () => {
         expect(
@@ -53,5 +55,30 @@ describe("Meridian platform", () => {
         expect(rotated?.id).not.toBe(original.id);
         expect(validateSession(original.id)).toBeNull();
         expect(validateSession(rotated!.id)).not.toBeNull();
+    });
+
+    it("processes a valid mock payment", async () => {
+        const provider = new MockPaymentProvider();
+
+        const result = await provider.charge({
+            amount: 49.99,
+            currency: "USD",
+            customerId: "customer-123",
+        });
+
+        expect(result.status).toBe("completed");
+        expect(result.provider).toBe("meridian-mock-payments");
+    });
+
+    it("rejects an invalid payment amount", async () => {
+        const provider = new MockPaymentProvider();
+
+        const result = await provider.charge({
+            amount: -10,
+            currency: "USD",
+            customerId: "customer-123",
+        });
+
+        expect(result.status).toBe("failed");
     });
 });
