@@ -11,6 +11,15 @@ import {
     validateSession,
 } from "../src/auth/session";
 
+import {
+    createLogEntry,
+    serializeLog,
+} from "../src/shared/logger";
+
+import {
+    createSecurityEvent,
+} from "../src/shared/security-events";
+
 describe("Meridian platform", () => {
     it("rejects invalid email addresses", () => {
         expect(
@@ -53,5 +62,28 @@ describe("Meridian platform", () => {
         expect(rotated?.id).not.toBe(original.id);
         expect(validateSession(original.id)).toBeNull();
         expect(validateSession(rotated!.id)).not.toBeNull();
+    });
+
+    it("serializes structured application logs", () => {
+        const entry = createLogEntry(
+            "INFO",
+            "meridian-api",
+            "Server started"
+        );
+
+        const serialized = JSON.parse(serializeLog(entry));
+
+        expect(serialized.level).toBe("INFO");
+        expect(serialized.service).toBe("meridian-api");
+    });
+
+    it("creates structured security events", () => {
+        const event = createSecurityEvent(
+            "LOGIN_FAILED",
+            "user-123"
+        );
+
+        expect(event.level).toBe("WARN");
+        expect(event.metadata?.category).toBe("SECURITY_EVENT");
     });
 });
