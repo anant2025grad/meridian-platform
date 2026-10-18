@@ -5,6 +5,8 @@ import { calculateTotal } from "../src/billing/payments";
 import { getMonthlyPrice } from "../src/billing/subscriptions";
 import { countEvents } from "../src/dashboard/analytics";
 
+import { renewSession } from "../src/auth/session";
+
 import {
     createSession,
     rotateSession,
@@ -54,4 +56,18 @@ describe("Meridian platform", () => {
         expect(validateSession(original.id)).toBeNull();
         expect(validateSession(rotated!.id)).not.toBeNull();
     });
+
+    it("renews a session approaching expiration", () => {
+        const session = createSession("user-456");
+
+        session.expiresAt = new Date(Date.now() + 30_000);
+
+        const renewed = renewSession(session.id);
+
+        expect(renewed).not.toBeNull();
+        expect(renewed!.expiresAt.getTime()).toBeGreaterThan(
+            Date.now() + 30 * 60 * 1000
+        );
+    });
+
 });
