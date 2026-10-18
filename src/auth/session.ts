@@ -51,3 +51,24 @@ export function rotateSession(sessionId: string): Session | null {
 
   return createSession(existing.userId);
 }
+
+export function renewSession(
+  sessionId: string,
+  renewalWindowMs = 10 * 60 * 1000
+): Session | null {
+  const session = validateSession(sessionId);
+
+  if (!session) {
+    return null;
+  }
+
+  const remaining = session.expiresAt.getTime() - Date.now();
+
+  if (remaining <= renewalWindowMs) {
+    session.expiresAt = new Date(
+      Date.now() + 60 * 60 * 1000
+    );
+  }
+
+  return session;
+}
